@@ -103,7 +103,6 @@ function addInventory() {
             
                     confirmAction(qty, product);
                 }
-     
         })
     })
 })
@@ -154,20 +153,17 @@ function addProduct() {
             }
         ])
         .then(function(answers) {
-            var product_name = answers.product_name;
-            var depart = answers.depart_name;
-            var price = answers.price;
-            var stock = answers.stock_quantity;
-
             connection.query("INSERT INTO products SET ?", {
-                product_name: product_name,
-                department_name: depart,
-                price: price,
-                stock_quantity: stock
+
+                product_name: answers.product_name,
+                department_name: answers.depart,
+                price: answers.price,
+                stock_quantity: answers.stock
 
             }, function(err, res){
                 if (err) throw err;
                 console.log(res);
+
             })
         })
 };
