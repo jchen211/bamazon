@@ -60,17 +60,24 @@ function viewProducts() {
 function lowInventory() {
     connection.query("SELECT stock_quantity FROM products ", function (err, res) {
         if (err) throw err;
-
-        if (res < 5) {
-            console.log(res);
-        } else {
-            console.log("Everything is fully in stock.");
+        for (var i = 0; i < res.length; i++) {
+            if (res[i] < 5) {
+            console.log(res[i]);
+        // } else {
+        //     console.log("Stocked");
+        // }
+            }
         }
     })
 };
 
 function addInventory() {
-    viewProducts();
+    connection.query("SELECT * FROM products", function(err, res){
+        if (err) throw err;
+
+        for (var i = 0; i < res.length; i++) {
+            console.log(res[i].id + "  ||  " + res[i].product_name + "  ||  price: " + res[i].price + "  ||  qty: " + res[i].stock_quantity);
+        }
 
     inquirer
         .prompt([
@@ -85,22 +92,44 @@ function addInventory() {
             }
         ])
         .then(function(answers) {
-
-            var product = answers.productID;
-            var qty = answers.ADDqty;
-
-            connection.query("UPDATE PRODUCTS SET ? WHERE ?", [{
-                stock_quantity: qty
-            }, {
-                id: product
-            }],
-             function(err, res) { 
+            connection.query("SELECT * FROM products WHERE id = " + answers.productID, function(err, res) {
                 if (err) throw err;
+
+                for (var i = 0; i < res.length; i++) {
+                    console.log("You are adding qty of: " + answers.ADDqty + " to " + res[i].product_name);
                 
-                console.log("Updated Inventory!");
-                console.log(res);
+                    var product = answers.productID;
+                    var qty = res[i].stock_quantity + answers.ADDqty;
+            
+                    confirmAction(qty, product);
+                }
+     
         })
     })
+})
+};
+
+function confirmAction(qty, product) {
+    inquirer
+        .prompt({
+            name: "confirm",
+            type: "list",
+            messages: "Is this correct?",
+            choices: ["yes", "no"]
+        })
+        .then(function(answer) {
+            if (answer.confirm === "yes") {
+                connection.query("UPDATE products SET ? WHERE ?", [{
+                    stock_quantity: qty
+                } , {
+                    id: product
+                }
+                ])
+                console.log ("Updated!");
+            } else {
+                console.log("Something went wrong. Please Try Again.");
+            }
+        })
 };
 
 function addProduct() {
