@@ -8,7 +8,7 @@ var connection = mysql.createConnection({
 
     user: "root",
 
-    password: "",
+    password: "lavii677914744",
     database: "bamazon"
 });
 
@@ -47,6 +47,8 @@ function managerOptions() {
         }); 
 };
 
+
+// --- VIEW PRODUCT --- //
 function viewProducts() {
     connection.query("SELECT * FROM products", function(err, res){
         if (err) throw err;
@@ -54,9 +56,13 @@ function viewProducts() {
         for (var i = 0; i < res.length; i++) {
             console.log(res[i].id + "  ||  " + res[i].product_name + "  ||  price: " + res[i].price + "  ||  qty: " + res[i].stock_quantity);
         }
+
+        connection.end();
     })
 };
 
+
+// --- LOW INVENTORY --- //
 function lowInventory() {
     connection.query("SELECT stock_quantity FROM products ", function (err, res) {
         if (err) throw err;
@@ -71,6 +77,7 @@ function lowInventory() {
     })
 };
 
+// --- ADD INVENTORY --- //
 function addInventory() {
     connection.query("SELECT * FROM products", function(err, res){
         if (err) throw err;
@@ -96,10 +103,11 @@ function addInventory() {
                 if (err) throw err;
 
                 for (var i = 0; i < res.length; i++) {
+                    console.log("---------------------------------");
                     console.log("You are adding qty of: " + answers.ADDqty + " to " + res[i].product_name);
                 
                     var product = answers.productID;
-                    var qty = res[i].stock_quantity + answers.ADDqty;
+                    var qty = res[i].stock_quantity + parseInt(answers.ADDqty);
             
                     confirmAction(qty, product);
                 }
@@ -124,13 +132,18 @@ function confirmAction(qty, product) {
                     id: product
                 }
                 ])
+                console.log("---------------------------------");
                 console.log ("Updated!");
+                connection.end();
             } else {
                 console.log("Something went wrong. Please Try Again.");
+                connection.end();
             }
         })
 };
 
+
+// --- ADD PRODUCT --- //
 function addProduct() {
     inquirer
         .prompt([
@@ -156,13 +169,20 @@ function addProduct() {
             connection.query("INSERT INTO products SET ?", {
 
                 product_name: answers.product_name,
-                department_name: answers.depart,
+                department_name: answers.depart_name,
                 price: answers.price,
-                stock_quantity: answers.stock
+                stock_quantity: answers.stock_quantity
 
             }, function(err, res){
                 if (err) throw err;
-                console.log(res);
+
+                console.log("---------------------------------");
+                console.log("Product Added");
+
+                console.log("---------------------------------");
+                console.log("\nCurrent Inventory");
+                console.log("---------------------------------");
+                viewProducts();
 
             })
         })
