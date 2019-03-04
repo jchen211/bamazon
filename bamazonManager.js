@@ -8,7 +8,7 @@ var connection = mysql.createConnection({
 
     user: "root",
 
-    password: "lavii677914744",
+    password: "",
     database: "bamazon"
 });
 
@@ -90,7 +90,7 @@ function addInventory() {
             {
                 name: "productID",
                 type: "input",
-                message: "Which product would you like to add inventory of?"       
+                message: "Enter product ID to select product. "       
             }, {
                 name: "ADDqty",
                 type: "input",
@@ -133,7 +133,8 @@ function confirmAction(qty, product) {
                 ])
                 console.log("---------------------------------");
                 console.log ("Updated!");
-                connection.end();
+                console.log("---------------------------------");
+                viewProducts();
             } else {
                 console.log("Something went wrong. Please Try Again.");
                 connection.end();
