@@ -64,14 +64,19 @@ function productSelect(){
         ])
         .then(function(answer){
             connection.query("SELECT * FROM products WHERE id = " + answer.productID, function(err, res){
+                if (err) throw err;
 
                 for (var i = 0; i < res.length; i++) {
                     if (answer.qty < res[i].stock_quantity) {
                         console.log("------------------------------"),
                         console.log(res[i].product_name +  "  ||  $" + res[i].price);
                         console.log("You have purchase: QTY: " + answer.qty +  "  ||  " + "Your total will be: " + res[i].price * answer.qty);
-                        console.log("Thank you for shopping!");
-                        connection.end();
+
+                        var updateQTY = (res[i].stock_quantity - answer.qty);
+                        var id = answer.productID;
+
+                        finalizePurchase(updateQTY, id);
+
                     } else {
                         console.log("------------------------------"),
                         console.log("Sorry! Not enough in stock.");
@@ -80,4 +85,33 @@ function productSelect(){
                 }
             })
         });
+};
+
+function finalizePurchase(updateQTY, id) {
+    inquirer
+        .prompt({
+            name: "confirm",
+            type: "list",
+            message: "Place Order?",
+            choices: ["yes", "no"]
+        })
+        .then(function(answer){
+            if (answer.confirm === "yes") {
+                connection.query("UPDATE products SET ? WHERE ?", [{
+                    stock_quantity: updateQTY
+
+                }, {
+                    id: id
+
+                }], function (err, res) {
+                    if (err) throw err;
+    
+                    console.log("Your Order has been submitted! Thank you!");
+                    connection.end();
+                })
+            } else {
+                console.log("Sorry to hear that. But Thank you for stopping by!");
+                connection.end();
+            }
+        })
 };
