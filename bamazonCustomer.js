@@ -19,68 +19,65 @@ connection.connect(function(err) {
 });
 
 function showProducts() {
+    
+    console.log("Items for Sale");
+    console.log("--------------------------------------------");
+
+    connection.query("SELECT * FROM products", function(err, res) {
+        if (err) throw err;
+    
+        for (var i = 0; i < res.length; i++) {
+            console.log(res[i].id + "  ||  " + res[i].product_name + "  ||  price: " + res[i].price + "  ||  qty: " + res[i].stock_quantity);
+        }
+        console.log("--------------------------------------------");
+
     inquirer
         .prompt({
-          name: "action",
-          type: "rawlist",
-          message: "What would you like to purchse?",
-          choices: [
-            "Potion",
-            "Super Potion",
-            "Max Potion",
-            "Oran Berry",
-            "Sitris Berry",
-            "Razz Berry",
-            "Ultra Ball",
-            "Premier Ball",
-            "Dusk Stone",
-            "Dawn Stone"
-          ]
-    })
+          name: "confirm",
+          type: "list",
+          message: "Would you like to make a purchase?",
+          choices: ["yes", "no"]
+        })
         .then(function(answer){
-            switch (answer.action) {
-             
-             case "Potion":
-             potion();
-             break;
-
-             case "Super Potion":
-             superPotion();
-             break;
-
-             case "Max Potion":
-             maxPotion();
-             break;
-
-             case "Oran Berry":
-             oranBerry();
-             break;
-
-             case "Sitrus Berry":
-             sitrusBerry();
-             break;
-
-             case "Razz Berry":
-             razzBerry();
-             break;
-
-             case "Ultra Ball":
-             ultraBall();
-             break;
-
-             case "Premier Ball":
-             premierBall();
-             break;
-
-             case "Dusk Stone":
-             duskStone();
-             break;
-
-             case "Dawn Stone":
-             dawnStone();
-             break;
+            if(answer.confirm === "yes") {
+                productSelect();
+            } else {
+                console.log("Thank you for stopping by!");
+                connection.end();
             }
         })
+    })
+}
 
-        connection.end();
+function productSelect(){
+    inquirer
+        .prompt([
+        {
+            name: "productID",
+            type: "input",
+            message: "Please enter Product ID to select the product.",
+        }, {
+            name: "qty",
+            type: "input",
+            message: "Please enter the quantity of the product you would like to purchase."
+        }
+        ])
+        .then(function(answer){
+            connection.query("SELECT * FROM products WHERE id = " + answer.productID, function(err, res){
+
+                for (var i = 0; i < res.length; i++) {
+                    if (answer.qty < res[i].stock_quantity) {
+                        console.log("------------------------------"),
+                        console.log(res[i].product_name +  "  ||  $" + res[i].price);
+                        console.log("You have purchase: QTY: " + answer.qty +  "  ||  " + "Your total will be: " + res[i].price * answer.qty);
+                        console.log("Thank you for shopping!");
+                        connection.end();
+                    } else {
+                        console.log("------------------------------"),
+                        console.log("Sorry! Not enough in stock.");
+                        connection.end();
+                    }
+                }
+            })
+        });
 };
