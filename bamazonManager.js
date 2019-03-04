@@ -64,16 +64,15 @@ function viewProducts() {
 
 // --- LOW INVENTORY --- //
 function lowInventory() {
-    connection.query("SELECT stock_quantity FROM products ", function (err, res) {
+    connection.query("SELECT product_name, stock_quantity FROM products ", function (err, res) {
         if (err) throw err;
         for (var i = 0; i < res.length; i++) {
-            if (res[i] < 5) {
-            console.log(res[i]);
-        // } else {
-        //     console.log("Stocked");
-        // }
-            }
+            if (res[i].stock_quantity < 5) {
+            console.log(res[i].product_name + " || " + res[i].stock_quantity);
+           }
         }
+        connection.end();
+
     })
 };
 
